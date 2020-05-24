@@ -54,6 +54,13 @@ if (SERVER) then
 	net.Receive("libgmodstore_uploaddebuglog",function(_,ply)
 		local authcode = net.ReadString()
 		if (libgmodstore:CanOpenMenu(ply,false)) then
+            if not DEBUGGING then -- Currently broken
+                net.Start("libgmodstore_uploaddebuglog")
+                net.WriteBool(false)
+                net.WriteString("Feature is currently disabled!")
+                net.Send(ply)
+                return
+            end
 			if (file.Exists("console.log","GAME")) then
 				local gamemode = (GM or GAMEMODE).Name
 				if ((GM or GAMEMODE).BaseClass) then
@@ -152,7 +159,7 @@ if (SERVER) then
 			options     = options,
 			metadata    = {}
 		}
-		if (options.version ~= nil) then
+		if (options.version ~= nil) and DEBUGGING then -- Also broken
 			http.Fetch("https://lib.gmodsto.re/api/update-check.php?script_id=" .. urlencode(script_id) .. "&version=" .. urlencode(options.version), function(body,size,headers,code)
 				if (code ~= 200) then
 					libgmodstore:print("[2] Error while checking for updates on script " .. script_id .. ": HTTP " .. code, "bad")

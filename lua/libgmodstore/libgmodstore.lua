@@ -383,6 +383,7 @@ Please enter the authorisation code below]])
                 m.Tabs.ActiveScripts.List:AddLine(script_id, data.script_name).script_id = script_id
             end
 
+            m.Tabs.ActiveScripts.List:SortByColumn(1, true)
             m.Tabs.ActiveScripts.ScriptHTML = vgui.Create("DHTML", m.Tabs.ActiveScripts)
             m.Tabs.ActiveScripts.ScriptHTML:Dock(RIGHT)
 
@@ -413,6 +414,7 @@ Please enter the authorisation code below]])
                 end
             end
 
+            m.Tabs.ScriptUpdates.List:SortByColumn(1, true)
             m.Tabs.ScriptUpdates.ScriptHTML = vgui.Create("DHTML", m.Tabs.ScriptUpdates)
             m.Tabs.ScriptUpdates.ScriptHTML:Dock(RIGHT)
 

@@ -308,10 +308,8 @@ Please enter the authorisation code below]]
 					m.Tabs.DebugLogs.Submit:Dock(TOP)
 					m.Tabs.DebugLogs.Submit:SetText("Submit")
 					function m.Tabs.DebugLogs.Submit:DoClick()
-						if not DEBUGGING then
-								Derma_Message("This feature is currently not working!","Error","OK")
-							return
-						end
+						Derma_Message("This feature is currently not working!","Error","OK")
+                        --[[
 						m.Tabs.DebugLogs.Submit:SetDisabled(true)
 						m.Tabs.DebugLogs.AuthorisationCode:SetDisabled(true)
 						http.Fetch("https://lib.gmodsto.re/api/validate-debug-auth.php?authcode=" .. m.Tabs.DebugLogs.AuthorisationCode:GetValue(), function(body,size,headers,code)
@@ -350,6 +348,7 @@ Please enter the authorisation code below]]
 							libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetDisabled(false)
 							libgmodstore.Menu.Tabs.DebugLogs.Submit:SetDisabled(false)
 						end)
+                        --]]
 					end
 
 				function m.Tabs.DebugLogs:PerformLayout()

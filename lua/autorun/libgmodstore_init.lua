@@ -1,4 +1,4 @@
-local DEBUGGING = false
+local DEBUGGING = true
 if (libgmodstore and not DEBUGGING) then return end -- We don't want to be running multiple times if we've already initialised
 libgmodstore = {}
 

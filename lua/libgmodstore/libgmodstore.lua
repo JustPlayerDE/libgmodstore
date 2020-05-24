@@ -1,4 +1,4 @@
-local DEBUGGING = false
+local DEBUGGING = true
 if (libgmodstore) then
 	if (DEBUGGING) then
 		if (IsValid(libgmodstore.Menu)) then
@@ -54,13 +54,11 @@ if (SERVER) then
 	net.Receive("libgmodstore_uploaddebuglog",function(_,ply)
 		local authcode = net.ReadString()
 		if (libgmodstore:CanOpenMenu(ply,false)) then
-            if not DEBUGGING then -- Currently broken
-                net.Start("libgmodstore_uploaddebuglog")
-                net.WriteBool(false)
-                net.WriteString("Feature is currently disabled!")
-                net.Send(ply)
-                return
-            end
+            net.Start("libgmodstore_uploaddebuglog")
+            net.WriteBool(false)
+            net.WriteString("Feature is currently disabled!")
+            net.Send(ply)
+            --[[
 			if (file.Exists("console.log","GAME")) then
 				local gamemode = (GM or GAMEMODE).Name
 				if ((GM or GAMEMODE).BaseClass) then
@@ -130,6 +128,7 @@ if (SERVER) then
 					net.WriteString("console.log was not found on your server. Please look at your server's console for how to fix this.")
 				net.Send(ply)
 			end
+            --]]
 		end
 	end)
 
@@ -156,10 +155,11 @@ if (SERVER) then
 		libgmodstore:print("[" .. script_id .. "] " .. script_name .. " is using libgmodstore")
 		libgmodstore.scripts[script_id] = {
 			script_name = script_name,
-			options     = options,
-			metadata    = {}
+			options	 = options,
+			metadata	= {}
 		}
-		if (options.version ~= nil) and DEBUGGING then -- Also broken
+        --[[
+		if (options.version ~= nil) then -- Also broken
 			http.Fetch("https://lib.gmodsto.re/api/update-check.php?script_id=" .. urlencode(script_id) .. "&version=" .. urlencode(options.version), function(body,size,headers,code)
 				if (code ~= 200) then
 					libgmodstore:print("[2] Error while checking for updates on script " .. script_id .. ": HTTP " .. code, "bad")
@@ -195,6 +195,7 @@ if (SERVER) then
 				libgmodstore.scripts[script_id].metadata.outdated = "ERROR"
 			end)
 		end
+        --]]
 		return true
 	end
 	hook.Run("libgmodstore_init")
@@ -228,10 +229,10 @@ else
 		local script_count = net.ReadInt(12)
 		local scripts = {}
 		for i=1,script_count do
-			local script_id    = net.ReadInt(16)
+			local script_id	= net.ReadInt(16)
 			local script_name  = net.ReadString()
-			local outdated     = net.ReadString()
-			local version      = net.ReadString()
+			local outdated	 = net.ReadString()
+			local version	  = net.ReadString()
 			scripts[script_id] = {
 				script_name = script_name
 			}
@@ -307,6 +308,10 @@ Please enter the authorisation code below]]
 					m.Tabs.DebugLogs.Submit:Dock(TOP)
 					m.Tabs.DebugLogs.Submit:SetText("Submit")
 					function m.Tabs.DebugLogs.Submit:DoClick()
+						if not DEBUGGING then
+								Derma_Message("This feature is currently not working!","Error","OK")
+							return
+						end
 						m.Tabs.DebugLogs.Submit:SetDisabled(true)
 						m.Tabs.DebugLogs.AuthorisationCode:SetDisabled(true)
 						http.Fetch("https://lib.gmodsto.re/api/validate-debug-auth.php?authcode=" .. m.Tabs.DebugLogs.AuthorisationCode:GetValue(), function(body,size,headers,code)

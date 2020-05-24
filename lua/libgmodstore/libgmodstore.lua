@@ -58,7 +58,7 @@ if (SERVER) then
             net.WriteBool(false)
             net.WriteString("Feature is currently disabled!")
             net.Send(ply)
-            --[[
+            --[[ TODO: Upload log feature
 			if (file.Exists("console.log","GAME")) then
 				local gamemode = (GM or GAMEMODE).Name
 				if ((GM or GAMEMODE).BaseClass) then
@@ -158,7 +158,7 @@ if (SERVER) then
 			options	 = options,
 			metadata	= {}
 		}
-        --[[
+        --[[ TODO: Update check feature
 		if (options.version ~= nil) then -- Also broken
 			http.Fetch("https://lib.gmodsto.re/api/update-check.php?script_id=" .. urlencode(script_id) .. "&version=" .. urlencode(options.version), function(body,size,headers,code)
 				if (code ~= 200) then
@@ -309,7 +309,7 @@ Please enter the authorisation code below]]
 					m.Tabs.DebugLogs.Submit:SetText("Submit")
 					function m.Tabs.DebugLogs.Submit:DoClick()
 						Derma_Message("This feature is currently not working!","Error","OK")
-                        --[[
+                        --[[ TODO: Upload log feature
 						m.Tabs.DebugLogs.Submit:SetDisabled(true)
 						m.Tabs.DebugLogs.AuthorisationCode:SetDisabled(true)
 						http.Fetch("https://lib.gmodsto.re/api/validate-debug-auth.php?authcode=" .. m.Tabs.DebugLogs.AuthorisationCode:GetValue(), function(body,size,headers,code)

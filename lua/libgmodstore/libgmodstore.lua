@@ -377,7 +377,7 @@ Please enter the authorisation code below]])
             m.Tabs.ActiveScripts.List:Dock(LEFT)
 
             function m.Tabs.ActiveScripts.List:OnRowSelected(_, row)
-                m.Tabs.ActiveScripts.ScriptHTML:OpenURL("https://gmodstore.com/scripts/view/" .. row.script_id)
+                m.Tabs.ActiveScripts.ScriptHTML:OpenURL("https://www.gmodstore.com/market/view/" .. row.script_id)
             end
 
             for script_id, data in pairs(scripts) do
@@ -403,7 +403,7 @@ Please enter the authorisation code below]])
             m.Tabs.ScriptUpdates.List:Dock(LEFT)
 
             function m.Tabs.ScriptUpdates.List:OnRowSelected(_, row)
-                m.Tabs.ScriptUpdates.ScriptHTML:OpenURL("https://gmodstore.com/scripts/view/" .. row.script_id .. "/versions")
+                m.Tabs.ScriptUpdates.ScriptHTML:OpenURL("https://www.gmodstore.com/market/view/" .. row.script_id .. "/versions")
             end
 
             for script_id, data in pairs(scripts) do

@@ -17,6 +17,13 @@ local function urlencode(str)
     return str
 end
 
+local function privacy(str)
+    str = string.gsub(str, "[0-9]?[0-9]?[0-9].[0-9]?[0-9]?[0-9].[0-9]?[0-9]?[0-9].[0-9]?[0-9]?[0-9]:", "x.x.x.x:") -- Remove any IP
+    str = str.gsub(str, "STEAM_[0-9]:[0-9]+:[0-9]+", "STEAM_x:x:x") -- Remove any ID
+
+    return str
+end
+
 if (SERVER) then
     libgmodstore.scripts = {}
     util.AddNetworkString("libgmodstore_openmenu")
@@ -58,75 +65,90 @@ if (SERVER) then
 
         if (libgmodstore:CanOpenMenu(ply, false)) then
             -- [[ TODO: Upload log feature
-			if (file.Exists("console.log","GAME")) then
-				local gamemode = (GM or GAMEMODE).Name
-				if ((GM or GAMEMODE).BaseClass) then
-					gamemode = gamemode .. " (derived from " .. (GM or GAMEMODE).BaseClass.Name .. ")"
-				end
-				local avg_ping = 0
-				for _,v in ipairs(player.GetHumans()) do
-					avg_ping = avg_ping + v:Ping()
-				end
-				avg_ping = math.Round(avg_ping / #player.GetHumans())
-				local arguments = {
-					uploader = ply:SteamID64(),
-					ip_address = game.GetIPAddress(),
-					server_name = GetConVar("hostname"):GetString(),
-					gamemode = gamemode,
-					avg_ping = tostring(avg_ping),
-					consolelog = file.Read("console.log","GAME"),
-					authcode = authcode
-				}
-				http.Post("https://test.test/upload-debug-log.php",arguments,function(body,size,headers,code) -- TODO: server url
-					if (code ~= 200) then
-						net.Start("libgmodstore_uploaddebuglog")
-							net.WriteBool(false)
-							net.WriteString("HTTP " .. code)
-						net.Send(ply)
-						return
-					end
-					if (size == 0) then
-						net.Start("libgmodstore_uploaddebuglog")
-							net.WriteBool(false)
-							net.WriteString("Empty body!")
-						net.Send(ply)
-						return
-					end
-					local decoded_body = util.JSONToTable(body)
-					if (not decoded_body) then
-						net.Start("libgmodstore_uploaddebuglog")
-							net.WriteBool(false)
-							net.WriteString("JSON error!")
-						net.Send(ply)
-						return
-					end
-					if (not decoded_body.success) then
-						net.Start("libgmodstore_uploaddebuglog")
-							net.WriteBool(false)
-							net.WriteString(decoded_body.error)
-						net.Send(ply)
-						return
-					end
-					net.Start("libgmodstore_uploaddebuglog")
-						net.WriteBool(true)
-						net.WriteString(decoded_body.result)
-					net.Send(ply)
-				end,function(err)
-					net.Start("libgmodstore_uploaddebuglog")
-						net.WriteBool(false)
-						net.WriteString(err)
-					net.Send(ply)
-				end)
-			else
-				libgmodstore:print("console.log was not found on your server!","bad")
-				libgmodstore:print("You probably have not added -condebug to your server's command line.")
-				libgmodstore:print("Add -condebug to your server's command line, restart the server and try again.")
+            if (file.Exists("console.log", "GAME")) then
+                local gamemode = (GM or GAMEMODE).Name
 
-				net.Start("libgmodstore_uploaddebuglog")
-					net.WriteBool(false)
-					net.WriteString("console.log was not found on your server. Please look at your server's console for how to fix this.")
-				net.Send(ply)
-			end
+                if ((GM or GAMEMODE).BaseClass) then
+                    gamemode = gamemode .. " (derived from " .. (GM or GAMEMODE).BaseClass.Name .. ")"
+                end
+
+                local avg_ping = 0
+
+                for _, v in ipairs(player.GetHumans()) do
+                    avg_ping = avg_ping + v:Ping()
+                end
+
+                avg_ping = math.Round(avg_ping / #player.GetHumans())
+
+                local arguments = {
+                    uploader = ply:SteamID64(),
+                    ip_address = game.GetIPAddress(),
+                    server_name = GetConVar("hostname"):GetString(),
+                    gamemode = gamemode,
+                    avg_ping = tostring(avg_ping),
+                    consolelog = privacy(file.Read("console.log", "GAME")),
+                    authcode = authcode
+                }
+
+                -- TODO: server url
+                http.Post("https://test.test/upload-debug-log.php", arguments, function(body, size, headers, code)
+                    if (code ~= 200) then
+                        net.Start("libgmodstore_uploaddebuglog")
+                        net.WriteBool(false)
+                        net.WriteString("HTTP " .. code)
+                        net.Send(ply)
+
+                        return
+                    end
+
+                    if (size == 0) then
+                        net.Start("libgmodstore_uploaddebuglog")
+                        net.WriteBool(false)
+                        net.WriteString("Empty body!")
+                        net.Send(ply)
+
+                        return
+                    end
+
+                    local decoded_body = util.JSONToTable(body)
+
+                    if (not decoded_body) then
+                        net.Start("libgmodstore_uploaddebuglog")
+                        net.WriteBool(false)
+                        net.WriteString("JSON error!")
+                        net.Send(ply)
+
+                        return
+                    end
+
+                    if (not decoded_body.success) then
+                        net.Start("libgmodstore_uploaddebuglog")
+                        net.WriteBool(false)
+                        net.WriteString(decoded_body.error)
+                        net.Send(ply)
+
+                        return
+                    end
+
+                    net.Start("libgmodstore_uploaddebuglog")
+                    net.WriteBool(true)
+                    net.WriteString(decoded_body.result)
+                    net.Send(ply)
+                end, function(err)
+                    net.Start("libgmodstore_uploaddebuglog")
+                    net.WriteBool(false)
+                    net.WriteString(err)
+                    net.Send(ply)
+                end)
+            else
+                libgmodstore:print("console.log was not found on your server!", "bad")
+                libgmodstore:print("You probably have not added -condebug to your server's command line.")
+                libgmodstore:print("Add -condebug to your server's command line, restart the server and try again.")
+                net.Start("libgmodstore_uploaddebuglog")
+                net.WriteBool(false)
+                net.WriteString("console.log was not found on your server. Please look at your server's console for how to fix this.")
+                net.Send(ply)
+            end
             --]]
         end
     end)
@@ -311,7 +333,8 @@ Please enter the authorisation code below]])
             m.Tabs.DebugLogs.Submit:SetDisabled(true)
             m.Tabs.DebugLogs.AuthorisationCode:SetDisabled(true)
 
-            http.Fetch("https://test.test/validate-debug-auth.php?authcode=" .. m.Tabs.DebugLogs.AuthorisationCode:GetValue(), function(body, size, headers, code) -- TODO: server url
+            -- TODO: server url
+            http.Fetch("https://test.test/validate-debug-auth.php?authcode=" .. m.Tabs.DebugLogs.AuthorisationCode:GetValue(), function(body, size, headers, code)
                 if (code ~= 200) then
                     Derma_Message("Error with validating auth code!\nError: HTTP " .. code, "Error", "OK")
                     libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetDisabled(false)

@@ -319,6 +319,8 @@ else
 To do this, you will need an authorisation code that the content creator should supply you with
 If they do not know where this is, they can get one at https://lib.gmodsto.re/debug/request/
 
+All IPs and SteamIDs will be removed before uploading.
+
 Please enter the authorisation code below]])
         m.Tabs.DebugLogs.AuthorisationCode = vgui.Create("DTextEntry", m.Tabs.DebugLogs.Container)
         m.Tabs.DebugLogs.AuthorisationCode:SetTall(25)

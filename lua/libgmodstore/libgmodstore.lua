@@ -57,10 +57,6 @@ if (SERVER) then
         local authcode = net.ReadString()
 
         if (libgmodstore:CanOpenMenu(ply, false)) then
-            net.Start("libgmodstore_uploaddebuglog")
-            net.WriteBool(false)
-            net.WriteString("Feature is currently disabled!")
-            net.Send(ply)
             -- [[ TODO: Upload log feature
 			if (file.Exists("console.log","GAME")) then
 				local gamemode = (GM or GAMEMODE).Name
@@ -311,7 +307,6 @@ Please enter the authorisation code below]])
         m.Tabs.DebugLogs.Submit:SetText("Submit")
 
         function m.Tabs.DebugLogs.Submit:DoClick()
-            Derma_Message("This feature is currently not working!", "Error", "OK")
             -- TODO: Upload log feature
             m.Tabs.DebugLogs.Submit:SetDisabled(true)
             m.Tabs.DebugLogs.AuthorisationCode:SetDisabled(true)

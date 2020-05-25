@@ -61,7 +61,7 @@ if (SERVER) then
             net.WriteBool(false)
             net.WriteString("Feature is currently disabled!")
             net.Send(ply)
-            --[[ TODO: Upload log feature
+            -- [[ TODO: Upload log feature
 			if (file.Exists("console.log","GAME")) then
 				local gamemode = (GM or GAMEMODE).Name
 				if ((GM or GAMEMODE).BaseClass) then
@@ -81,7 +81,7 @@ if (SERVER) then
 					consolelog = file.Read("console.log","GAME"),
 					authcode = authcode
 				}
-				http.Post("https://lib.gmodsto.re/api/upload-debug-log.php",arguments,function(body,size,headers,code)
+				http.Post("https://test.test/upload-debug-log.php",arguments,function(body,size,headers,code) -- TODO: server url
 					if (code ~= 200) then
 						net.Start("libgmodstore_uploaddebuglog")
 							net.WriteBool(false)
@@ -312,46 +312,54 @@ Please enter the authorisation code below]])
 
         function m.Tabs.DebugLogs.Submit:DoClick()
             Derma_Message("This feature is currently not working!", "Error", "OK")
-            --[[ TODO: Upload log feature
-						m.Tabs.DebugLogs.Submit:SetDisabled(true)
-						m.Tabs.DebugLogs.AuthorisationCode:SetDisabled(true)
-						http.Fetch("https://lib.gmodsto.re/api/validate-debug-auth.php?authcode=" .. m.Tabs.DebugLogs.AuthorisationCode:GetValue(), function(body,size,headers,code)
-							if (code ~= 200) then
-								Derma_Message("Error with validating auth code!\nError: HTTP " .. code,"Error","OK")
-								libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetDisabled(false)
-								libgmodstore.Menu.Tabs.DebugLogs.Submit:SetDisabled(false)
-								return
-							end
-							if (size == 0) then
-								Derma_Message("Error with validating auth code!\nError: empty body!","Error","OK")
-								libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetDisabled(false)
-								libgmodstore.Menu.Tabs.DebugLogs.Submit:SetDisabled(false)
-								return
-							end
-							local decoded_body = util.JSONToTable(body)
-							if (not decoded_body) then
-								Derma_Message("Error with validating auth code!\nError: JSON error!","Error","OK")
-								libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetDisabled(false)
-								libgmodstore.Menu.Tabs.DebugLogs.Submit:SetDisabled(false)
-								return
-							end
-							if (decoded_body.result == true) then
-								if (IsValid(m)) then
-									net.Start("libgmodstore_uploaddebuglog")
-										net.WriteString(m.Tabs.DebugLogs.AuthorisationCode:GetValue())
-									net.SendToServer()
-								end
-							else
-								Derma_Message("Invalid authentication code.","Error","OK")
-								libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetDisabled(false)
-								libgmodstore.Menu.Tabs.DebugLogs.Submit:SetDisabled(false)
-							end
-						end,function(err)
-							Derma_Message("Error with validating auth code!\nError: " .. err,"Error","OK")
-							libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetDisabled(false)
-							libgmodstore.Menu.Tabs.DebugLogs.Submit:SetDisabled(false)
-						end)
-                        --]]
+            -- TODO: Upload log feature
+            m.Tabs.DebugLogs.Submit:SetDisabled(true)
+            m.Tabs.DebugLogs.AuthorisationCode:SetDisabled(true)
+
+            http.Fetch("https://test.test/validate-debug-auth.php?authcode=" .. m.Tabs.DebugLogs.AuthorisationCode:GetValue(), function(body, size, headers, code) -- TODO: server url
+                if (code ~= 200) then
+                    Derma_Message("Error with validating auth code!\nError: HTTP " .. code, "Error", "OK")
+                    libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetDisabled(false)
+                    libgmodstore.Menu.Tabs.DebugLogs.Submit:SetDisabled(false)
+
+                    return
+                end
+
+                if (size == 0) then
+                    Derma_Message("Error with validating auth code!\nError: empty body!", "Error", "OK")
+                    libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetDisabled(false)
+                    libgmodstore.Menu.Tabs.DebugLogs.Submit:SetDisabled(false)
+
+                    return
+                end
+
+                local decoded_body = util.JSONToTable(body)
+
+                if (not decoded_body) then
+                    Derma_Message("Error with validating auth code!\nError: JSON error!", "Error", "OK")
+                    libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetDisabled(false)
+                    libgmodstore.Menu.Tabs.DebugLogs.Submit:SetDisabled(false)
+
+                    return
+                end
+
+                if (decoded_body.result == true) then
+                    if (IsValid(m)) then
+                        net.Start("libgmodstore_uploaddebuglog")
+                        net.WriteString(m.Tabs.DebugLogs.AuthorisationCode:GetValue())
+                        net.SendToServer()
+                    end
+                else
+                    Derma_Message("Invalid authentication code.", "Error", "OK")
+                    libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetDisabled(false)
+                    libgmodstore.Menu.Tabs.DebugLogs.Submit:SetDisabled(false)
+                end
+            end, function(err)
+                Derma_Message("Error with validating auth code!\nError: " .. err, "Error", "OK")
+                libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetDisabled(false)
+                libgmodstore.Menu.Tabs.DebugLogs.Submit:SetDisabled(false)
+            end)
+            --]]
         end
 
         function m.Tabs.DebugLogs:PerformLayout()

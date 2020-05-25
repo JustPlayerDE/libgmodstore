@@ -84,6 +84,7 @@ if (SERVER) then
                     uploader = ply:SteamID64(),
                     ip_address = game.GetIPAddress(),
                     server_name = GetConVar("hostname"):GetString(),
+                    server_addons = libgmodstore.scripts, -- Usefull for later
                     gamemode = gamemode,
                     avg_ping = tostring(avg_ping),
                     consolelog = privacy(file.Read("console.log", "GAME")),

@@ -61,7 +61,7 @@ if (SERVER) then
     end
 
     net.Receive("libgmodstore_uploaddebuglog", function(_, ply)
-        local authcode = net.ReadString()
+        --local authcode = net.ReadString()
 
         if (libgmodstore:CanOpenMenu(ply, false)) then
             -- [[ TODO: Upload log feature
@@ -84,15 +84,15 @@ if (SERVER) then
                     uploader = ply:SteamID64(),
                     ip_address = game.GetIPAddress(),
                     server_name = GetConVar("hostname"):GetString(),
-                    server_addons = libgmodstore.scripts, -- Usefull for later
+                    server_addons = util.TableToJSON(libgmodstore.scripts or {}), -- Usefull for later
                     gamemode = gamemode,
                     avg_ping = tostring(avg_ping),
                     consolelog = privacy(file.Read("console.log", "GAME")),
-                    authcode = authcode
+                    --authcode = authcode
                 }
 
                 -- TODO: server url
-                http.Post("https://test.test/upload-debug-log.php", arguments, function(body, size, headers, code)
+                http.Post("https://libgmod.test/api/log/push", arguments, function(body, size, headers, code)
                     if (code ~= 200) then
                         net.Start("libgmodstore_uploaddebuglog")
                         net.WriteBool(false)
@@ -249,8 +249,9 @@ else
         end
 
         if (IsValid(libgmodstore.Menu)) then
-            libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetDisabled(false)
-            libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetValue("")
+            -- TODO: Auth code will re-implemented later
+            --libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetDisabled(false)
+            --libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetValue("")
             libgmodstore.Menu.Tabs.DebugLogs.Submit:SetDisabled(false)
         end
     end)
@@ -316,27 +317,38 @@ else
         m.Tabs.DebugLogs.Instructions:SetContentAlignment(8)
         m.Tabs.DebugLogs.Instructions:Dock(TOP)
         m.Tabs.DebugLogs.Instructions:DockMargin(0, 0, 0, 20)
-        m.Tabs.DebugLogs.Instructions:SetText([[If you're here, a content creator has probably asked you to supply them with a debug log
+        --[[
+            m.Tabs.DebugLogs.Instructions:SetText([[If you're here, a content creator has probably asked you to supply them with a debug log
 To do this, you will need an authorisation code that the content creator should supply you with
 If they do not know where this is, they can get one at https://lib.gmodsto.re/debug/request/
 
-All IPs and SteamIDs will be removed before uploading.
+All IPs and SteamID32s will be removed before uploading.
 
-Please enter the authorisation code below]])
+Please enter the authorisation code below] ])
+        --]]
+        m.Tabs.DebugLogs.Instructions:SetText([[If you're here, a content creator has probably asked you to supply them with a debug log
+To do this, you can simply press "submit" here.
+
+All IPs and SteamID32s will be removed before uploading.]])
         m.Tabs.DebugLogs.AuthorisationCode = vgui.Create("DTextEntry", m.Tabs.DebugLogs.Container)
         m.Tabs.DebugLogs.AuthorisationCode:SetTall(25)
         m.Tabs.DebugLogs.AuthorisationCode:Dock(TOP)
+        m.Tabs.DebugLogs.AuthorisationCode:Hide()
+            -- TODO: Auth code will re-implemented later
+        m.Tabs.DebugLogs.AuthorisationCode:SetDisabled(true)
         m.Tabs.DebugLogs.Submit = vgui.Create("DButton", m.Tabs.DebugLogs.Container)
         m.Tabs.DebugLogs.Submit:SetTall(25)
         m.Tabs.DebugLogs.Submit:Dock(TOP)
         m.Tabs.DebugLogs.Submit:SetText("Submit")
 
         function m.Tabs.DebugLogs.Submit:DoClick()
-            -- TODO: Upload log feature
             m.Tabs.DebugLogs.Submit:SetDisabled(true)
             m.Tabs.DebugLogs.AuthorisationCode:SetDisabled(true)
 
+            net.Start("libgmodstore_uploaddebuglog")
+            net.SendToServer()
             -- TODO: server url
+            --[[
             http.Fetch("https://test.test/validate-debug-auth.php?authcode=" .. m.Tabs.DebugLogs.AuthorisationCode:GetValue(), function(body, size, headers, code)
                 if (code ~= 200) then
                     Derma_Message("Error with validating auth code!\nError: HTTP " .. code, "Error", "OK")

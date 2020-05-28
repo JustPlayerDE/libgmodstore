@@ -1,10 +1,13 @@
 local DEBUGGING = true
+local URL = "https://libgmod.test"
 
-if (libgmodstore) then
-    if (DEBUGGING) then
-        if (IsValid(libgmodstore.Menu)) then
-            libgmodstore.Menu:Close()
-        end
+if libgmodstore and DEBUGGING then
+    if (IsValid(libgmodstore.Menu)) then
+        libgmodstore.Menu:Close()
+    end
+
+    if (IsValid(libgmodstore.AuthWindow)) then
+        libgmodstore.AuthWindow:Remove()
     end
 end
 
@@ -22,6 +25,23 @@ local function privacy(str)
     str = str.gsub(str, "STEAM_[0-9]:[0-9]+:[0-9]+", "STEAM_x:x:x") -- Remove any ID
 
     return str
+end
+
+local function generateAddonReport()
+    local addons = {}
+
+    for id, meta in pairs(libgmodstore.scripts) do
+        local data = {
+            name = meta.script_name,
+            id = id or "N/A",
+            version = meta.options.version or "N/A",
+            licensee = meta.options.licensee or "N/A"
+        }
+
+        table.insert(addons, data)
+    end
+
+    return urlencode(util.TableToJSON(addons))
 end
 
 if (SERVER) then
@@ -61,10 +81,9 @@ if (SERVER) then
     end
 
     net.Receive("libgmodstore_uploaddebuglog", function(_, ply)
-        --local authcode = net.ReadString()
+        local authcode = net.ReadString()
 
         if (libgmodstore:CanOpenMenu(ply, false)) then
-            -- [[ TODO: Upload log feature
             if (file.Exists("console.log", "GAME")) then
                 local gamemode = (GM or GAMEMODE).Name
 
@@ -84,15 +103,15 @@ if (SERVER) then
                     uploader = ply:SteamID64(),
                     ip_address = game.GetIPAddress(),
                     server_name = GetConVar("hostname"):GetString(),
-                    server_addons = util.TableToJSON(libgmodstore.scripts or {}), -- Usefull for later
+                    server_addons = generateAddonReport(), -- Usefull for later
                     gamemode = gamemode,
                     avg_ping = tostring(avg_ping),
                     consolelog = privacy(file.Read("console.log", "GAME")),
-                    --authcode = authcode
+                    token = authcode
                 }
 
                 -- TODO: server url
-                http.Post("https://libgmod.test/api/log/push", arguments, function(body, size, headers, code)
+                http.Post(URL .. "/api/log/push", arguments, function(body, size, headers, code)
                     if (code ~= 200) then
                         net.Start("libgmodstore_uploaddebuglog")
                         net.WriteBool(false)
@@ -150,7 +169,6 @@ if (SERVER) then
                 net.WriteString("console.log was not found on your server. Please look at your server's console for how to fix this.")
                 net.Send(ply)
             end
-            --]]
         end
     end)
 
@@ -249,9 +267,6 @@ else
         end
 
         if (IsValid(libgmodstore.Menu)) then
-            -- TODO: Auth code will re-implemented later
-            --libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetDisabled(false)
-            --libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetValue("")
             libgmodstore.Menu.Tabs.DebugLogs.Submit:SetDisabled(false)
         end
     end)
@@ -299,7 +314,7 @@ else
         m.Tabs:AddSheet("Info", m.Tabs.Info, "icon16/information.png")
         m.Tabs.Info.HTML = vgui.Create("DHTML", m.Tabs.Info)
         m.Tabs.Info.HTML:Dock(FILL)
-        m.Tabs.Info.HTML:OpenURL("https://lib.gmodsto.re")
+        m.Tabs.Info.HTML:OpenURL(URL)
         m.Tabs.ActiveScripts = vgui.Create("DPanel", m.Tabs)
         m.Tabs.ActiveScripts:SetBackgroundColor(Color(35, 36, 31))
         m.Tabs:AddSheet("Active Scripts", m.Tabs.ActiveScripts, "icon16/script.png")
@@ -317,87 +332,77 @@ else
         m.Tabs.DebugLogs.Instructions:SetContentAlignment(8)
         m.Tabs.DebugLogs.Instructions:Dock(TOP)
         m.Tabs.DebugLogs.Instructions:DockMargin(0, 0, 0, 20)
-        --[[
-            m.Tabs.DebugLogs.Instructions:SetText([[If you're here, a content creator has probably asked you to supply them with a debug log
-To do this, you will need an authorisation code that the content creator should supply you with
-If they do not know where this is, they can get one at https://lib.gmodsto.re/debug/request/
-
-All IPs and SteamID32s will be removed before uploading.
-
-Please enter the authorisation code below] ])
-        --]]
         m.Tabs.DebugLogs.Instructions:SetText([[If you're here, a content creator has probably asked you to supply them with a debug log
-To do this, you can simply press "submit" here.
+To do this, you need to Authenticate yourself with your Steam account.
+
+This is only to prevent abuse of this system.
 
 All IPs and SteamID32s will be removed before uploading.]])
-        m.Tabs.DebugLogs.AuthorisationCode = vgui.Create("DTextEntry", m.Tabs.DebugLogs.Container)
-        m.Tabs.DebugLogs.AuthorisationCode:SetTall(25)
-        m.Tabs.DebugLogs.AuthorisationCode:Dock(TOP)
-        m.Tabs.DebugLogs.AuthorisationCode:Hide()
-            -- TODO: Auth code will re-implemented later
-        m.Tabs.DebugLogs.AuthorisationCode:SetDisabled(true)
         m.Tabs.DebugLogs.Submit = vgui.Create("DButton", m.Tabs.DebugLogs.Container)
         m.Tabs.DebugLogs.Submit:SetTall(25)
         m.Tabs.DebugLogs.Submit:Dock(TOP)
-        m.Tabs.DebugLogs.Submit:SetText("Submit")
+        m.Tabs.DebugLogs.Submit:SetText("Authenticate")
 
+        -- TODO: Optimising Auth stuff
         function m.Tabs.DebugLogs.Submit:DoClick()
-            m.Tabs.DebugLogs.Submit:SetDisabled(true)
-            m.Tabs.DebugLogs.AuthorisationCode:SetDisabled(true)
+            --m.Tabs.DebugLogs.Submit:SetDisabled(true)
+            if libgmodstore.AuthWindow and IsValid(libgmodstore.AuthWindow) then
+                libgmodstore.AuthWindow:Remove()
+            end
 
-            net.Start("libgmodstore_uploaddebuglog")
-            net.SendToServer()
-            -- TODO: server url
             --[[
-            http.Fetch("https://test.test/validate-debug-auth.php?authcode=" .. m.Tabs.DebugLogs.AuthorisationCode:GetValue(), function(body, size, headers, code)
-                if (code ~= 200) then
-                    Derma_Message("Error with validating auth code!\nError: HTTP " .. code, "Error", "OK")
-                    libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetDisabled(false)
-                    libgmodstore.Menu.Tabs.DebugLogs.Submit:SetDisabled(false)
-
-                    return
-                end
-
-                if (size == 0) then
-                    Derma_Message("Error with validating auth code!\nError: empty body!", "Error", "OK")
-                    libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetDisabled(false)
-                    libgmodstore.Menu.Tabs.DebugLogs.Submit:SetDisabled(false)
-
-                    return
-                end
-
-                local decoded_body = util.JSONToTable(body)
-
-                if (not decoded_body) then
-                    Derma_Message("Error with validating auth code!\nError: JSON error!", "Error", "OK")
-                    libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetDisabled(false)
-                    libgmodstore.Menu.Tabs.DebugLogs.Submit:SetDisabled(false)
-
-                    return
-                end
-
-                if (decoded_body.result == true) then
-                    if (IsValid(m)) then
-                        net.Start("libgmodstore_uploaddebuglog")
-                        net.WriteString(m.Tabs.DebugLogs.AuthorisationCode:GetValue())
-                        net.SendToServer()
-                    end
-                else
-                    Derma_Message("Invalid authentication code.", "Error", "OK")
-                    libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetDisabled(false)
-                    libgmodstore.Menu.Tabs.DebugLogs.Submit:SetDisabled(false)
-                end
-            end, function(err)
-                Derma_Message("Error with validating auth code!\nError: " .. err, "Error", "OK")
-                libgmodstore.Menu.Tabs.DebugLogs.AuthorisationCode:SetDisabled(false)
-                libgmodstore.Menu.Tabs.DebugLogs.Submit:SetDisabled(false)
-            end)
+                Authentication Window
+                If you tamper with it on your server you may get Banned.
             --]]
+            local FRAME = vgui.Create("DFrame")
+            FRAME:SetSize(width * .9, height * .9)
+            FRAME:SetTitle("Authenticate with Steam - Only input your data if you trust the garrysmod server!")
+            FRAME:Center()
+            FRAME:MakePopup()
+            FRAME:ShowCloseButton(false)
+            FRAME.Html = vgui.Create("DHTML", FRAME)
+            FRAME.Html:Dock(FILL)
+
+            FRAME.Html:AddFunction("window", "SetAccessToken", function(token)
+                if IsValid(FRAME) then
+                    FRAME:Remove()
+                end
+
+                net.Start("libgmodstore_uploaddebuglog")
+                net.WriteString(token)
+                net.SendToServer()
+            end)
+
+            FRAME.Buttons = vgui.Create("DPanel", FRAME)
+            FRAME.Buttons.Paint = function() end
+            FRAME.Buttons:Dock(BOTTOM)
+            FRAME.Retry = vgui.Create("DButton", FRAME.Buttons)
+            FRAME.Retry:SetTall(25)
+            FRAME.Retry:Dock(LEFT)
+            FRAME.Retry:SetText("Retry")
+
+            FRAME.Retry.DoClick = function(self)
+                if not IsValid(FRAME) then return end
+                FRAME.Html:OpenURL(URL .. "/iaa")
+            end
+
+            FRAME.Retry:DoClick() -- Lazy way to prevent writing the same stuff again
+            FRAME.btnClose = vgui.Create("DButton", FRAME.Buttons)
+            FRAME.btnClose:SetTall(25)
+            FRAME.btnClose:Dock(RIGHT)
+            FRAME.btnClose:SetText("Close")
+
+            FRAME.btnClose.DoClick = function(self)
+                if not IsValid(libgmodstore.AuthWindow) then return end
+                libgmodstore.AuthWindow:Remove()
+            end
+
+            libgmodstore.AuthWindow = FRAME
         end
 
         function m.Tabs.DebugLogs:PerformLayout()
             m.Tabs.DebugLogs.Instructions:SizeToContentsY()
-            m.Tabs.DebugLogs.AuthorisationCode:DockMargin((self:GetWide() - 240) / 2, 0, (self:GetWide() - 240) / 2, 0)
+            --m.Tabs.DebugLogs.AuthorisationCode:DockMargin((self:GetWide() - 240) / 2, 0, (self:GetWide() - 240) / 2, 0)
             m.Tabs.DebugLogs.Submit:DockMargin((self:GetWide() - 100) / 2, 5, (self:GetWide() - 100) / 2, 0)
             m.Tabs.DebugLogs.Container:SizeToChildren(false, true)
             m.Tabs.DebugLogs.Container:Center()

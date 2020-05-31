@@ -181,8 +181,9 @@ if (SERVER) then
             for script_id, data in pairs(my_scripts) do
                 net.WriteInt(script_id, 16)
                 net.WriteString(data.script_name)
-                net.WriteString(tostring(data.outdated))
+                net.WriteUInt(data.metadata.status, 2) -- ERROR,OK and OUTDATED
                 net.WriteString(tostring(data.options.version or "UNKNOWN"))
+            print(script_id, data.metadata.status)
             end
 
             net.Send(ply)
@@ -200,42 +201,44 @@ if (SERVER) then
             options = options,
             metadata = {}
         }
-        --[[ TODO: Update check feature
+        -- [[ TODO: Update check feature
 		if (options.version ~= nil) then -- Also broken
-			http.Fetch("https://lib.gmodsto.re/api/update-check.php?script_id=" .. urlencode(script_id) .. "&version=" .. urlencode(options.version), function(body,size,headers,code)
+			http.Fetch("https://libgmod.test/api/checkversion/" .. urlencode(script_id) .. "/" .. urlencode(options.version), function(body,size,headers,code)
 				if (code ~= 200) then
 					libgmodstore:print("[2] Error while checking for updates on script " .. script_id .. ": HTTP " .. code, "bad")
-					libgmodstore.scripts[script_id].metadata.outdated = "ERROR"
+					libgmodstore.scripts[script_id].metadata.status = libgmodstore.ERROR
 					return
 				end
 				if (size == 0) then
 					libgmodstore:print("[3] Error while checking for updates on script " .. script_id .. ": empty body!", "bad")
-					libgmodstore.scripts[script_id].metadata.outdated = "ERROR"
+					libgmodstore.scripts[script_id].metadata.status = libgmodstore.ERROR
 					return
 				end
 				local decoded_body = util.JSONToTable(body)
 				if (not decoded_body) then
 					print(body)
 					libgmodstore:print("[4] Error while checking for updates on script " .. script_id .. ": JSON error!", "bad")
-					libgmodstore.scripts[script_id].metadata.outdated = "ERROR"
+					libgmodstore.scripts[script_id].metadata.status = libgmodstore.ERROR
 					return
 				end
 				if (not decoded_body.success) then
 					libgmodstore:print("[4] Error while checking for updates on script " .. script_id .. ": " .. decoded_body.error, "bad")
-					libgmodstore.scripts[script_id].metadata.outdated = "ERROR"
+					libgmodstore.scripts[script_id].metadata.status = libgmodstore.ERROR
 					return
 				end
 				if (decoded_body.result.outdated == true) then
 					libgmodstore:print("[" .. script_id .. "] " .. script_name .. " is outdated! The latest version is " .. decoded_body.result.version .. " while you have " .. options.version, "bad")
-					libgmodstore.scripts[script_id].metadata.outdated = true
+					libgmodstore.scripts[script_id].metadata.status = libgmodstore.OUTDATED
 				else
 					libgmodstore:print("[" .. script_id .. "] " .. script_name .. " is up to date!", "good")
-					libgmodstore.scripts[script_id].metadata.outdated = false
+					libgmodstore.scripts[script_id].metadata.status = libgmodstore.OK
 				end
 			end,function(err)
 				libgmodstore:print("[1] Error while checking for updates on script " .. script_id .. ": " .. err, "bad")
-				libgmodstore.scripts[script_id].metadata.outdated = "ERROR"
+				libgmodstore.scripts[script_id].metadata.status = libgmodstore.ERROR
 			end)
+        else
+            libgmodstore.scripts[script_id].metadata.status = libgmodstore.NO_VERSION
 		end
         --]]
 
@@ -278,20 +281,14 @@ else
         for i = 1, script_count do
             local script_id = net.ReadInt(16)
             local script_name = net.ReadString()
-            local outdated = net.ReadString()
+            local status = net.ReadUInt(2)
             local version = net.ReadString()
 
             scripts[script_id] = {
-                script_name = script_name
+                script_name = script_name,
+                status = status,
+                version = version
             }
-
-            if (tobool(outdated)) then
-                scripts[script_id].outdated = tobool(outdated)
-            else
-                scripts[script_id].outdated = outdated
-            end
-
-            scripts[script_id].version = version
         end
 
         if (IsValid(libgmodstore.Menu)) then
@@ -451,11 +448,12 @@ All IPs and SteamID32s will be removed before uploading.]])
             function m.Tabs.ScriptUpdates.List:OnRowSelected(_, row)
                 m.Tabs.ScriptUpdates.ScriptHTML:OpenURL("https://www.gmodstore.com/market/view/" .. row.script_id .. "/versions")
             end
-
             for script_id, data in pairs(scripts) do
-                if (type(data.outdated) == "string") then
+                if data.status == libgmodstore.NO_VERSION then
+                    m.Tabs.ScriptUpdates.List:AddLine(script_id, data.script_name, "N/A", data.version).script_id = script_id
+                elseif data.status == libgmodstore.ERROR then
                     m.Tabs.ScriptUpdates.List:AddLine(script_id, data.script_name, "ERROR", data.version).script_id = script_id
-                elseif (data.outdated == false) then
+                elseif data.status == libgmodstore.OUTDATED then
                     m.Tabs.ScriptUpdates.List:AddLine(script_id, data.script_name, "YES", data.version).script_id = script_id
                 else
                     m.Tabs.ScriptUpdates.List:AddLine(script_id, data.script_name, "NO", data.version).script_id = script_id

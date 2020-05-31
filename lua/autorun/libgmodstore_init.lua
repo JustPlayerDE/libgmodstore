@@ -2,6 +2,11 @@ local DEBUGGING = true
 if (libgmodstore and not DEBUGGING) then return end -- We don't want to be running multiple times if we've already initialised
 libgmodstore = {}
 
+libgmodstore.ERROR = 0
+libgmodstore.OK = 1
+libgmodstore.OUTDATED = 2
+libgmodstore.NO_VERSION = 3
+
 function libgmodstore:print(msg, type)
     if (type == "error" or type == "bad") then
         MsgC(Color(255, 0, 0), "[libgmodstore] ", Color(255, 255, 255), msg .. "\n")

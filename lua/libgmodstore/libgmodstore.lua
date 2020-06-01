@@ -21,8 +21,7 @@ local function urlencode(str)
 end
 
 local function privacy(str)
-    str = string.gsub(str, "[0-9]?[0-9]?[0-9].[0-9]?[0-9]?[0-9].[0-9]?[0-9]?[0-9].[0-9]?[0-9]?[0-9]:", "x.x.x.x:") -- Remove any IP
-    str = str.gsub(str, "STEAM_[0-9]:[0-9]+:[0-9]+", "STEAM_x:x:x") -- Remove any ID
+    str = string.gsub(str, "[0-9]?[0-9]?[0-9]%.[0-9]?[0-9]?[0-9]%.[0-9]?[0-9]?[0-9]%.[0-9]?[0-9]?[0-9]", "x.x.x.x") -- Remove any IP
 
     return str
 end
@@ -344,7 +343,7 @@ To do this, you need to Authenticate yourself with your Steam account.
 
 This is only to prevent abuse of this system.
 
-All IPs and SteamID32s will be removed before uploading.]])
+All IPs are removed before uploading.]])
         m.Tabs.DebugLogs.Submit = vgui.Create("DButton", m.Tabs.DebugLogs.Container)
         m.Tabs.DebugLogs.Submit:SetTall(25)
         m.Tabs.DebugLogs.Submit:Dock(TOP)

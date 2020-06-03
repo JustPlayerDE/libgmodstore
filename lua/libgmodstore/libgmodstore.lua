@@ -1,7 +1,6 @@
-local DEBUGGING = false
 local URL = "https://libgmod.justplayer.de"
 
-if libgmodstore and DEBUGGING then
+if libgmodstore and LIBGMODSTORE_DEBUG then
     if (IsValid(libgmodstore.Menu)) then
         libgmodstore.Menu:Close()
     end
@@ -202,7 +201,7 @@ if (SERVER) then
 
         -- [[ TODO: Update check feature
         -- Also broken
-        if (options.version ~= nil) and DEBUGGING then
+        if (options.version ~= nil) then
             http.Fetch(URL .. "/api/checkversion/" .. urlencode(script_id) .. "/" .. urlencode(options.version), function(body, size, headers, code)
                 if (code ~= 200) then
                     libgmodstore:print("[2] Error while checking for updates on script " .. script_id .. ": HTTP " .. code, "bad")

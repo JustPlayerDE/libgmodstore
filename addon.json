@@ -1,0 +1,20 @@
+{
+    "title": "Libgmodstore",
+    "type": "tool",
+    "tags": [],
+    "ignore": [
+        "*.psd",
+        "*.vcproj",
+        "*.svn*",
+        "*.git*",
+        "*.json",
+        "*.bat",
+        "*.json",
+        "LICENSE",
+        "README.md",
+        "icon.jpg",
+        "*.example",
+        "path.txt",
+        "*.gma"
+    ]
+}

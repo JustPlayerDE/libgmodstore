@@ -19,7 +19,8 @@ If a Gmodstore script installed on the server is outdated, a notification will a
 ### Debug Logs
 
 The user only need to Login via Steam (ingame) to upload a copy of the server's console.log.
-Any IP will be removed to support privacy.
+
+To help with privacy, all IPs (except the server's one) will be removed from the Logfile before uploading.
 
 Debug Logs contain the following informations:
 

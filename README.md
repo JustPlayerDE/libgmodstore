@@ -1,14 +1,42 @@
+# About
+
 Read the [thread](https://www.gmodstore.com/community/threads/4465-libgmodstore) on gmodstore.
-
-~~Do NOT package this branch with your addons! Package the [launcher branch](https://github.com/WilliamVenner/libgmodstore/tree/launcher) as it automatically updates using `RunString`.~~
-
-For now please use this branch in case you want to use this, Auto update will be fixed later. (sorry billy)
 
 You can Download the newest version here: [Download](https://github.com/JustPlayerDE/libgmodstore/archive/master.zip) (Auto updater comes later)
 
-This version is using [libgmod.justplayer.de](https://libgmod.justplayer.de).
+Content Creators can register there addons on [libgmod.justplayer.de](https://libgmod.justplayer.de).
 
-### Example Code for your addon
+# Features
+
+### Ingame Menu
+
+This is where server owners will interact with the library. At the moment, it's a simple docked default Derma skin frame, so it's not the nicest looking thing in the world but it's fast, efficient and has maximum portability. It is opened by typing `!libgmodstore` in chat.
+
+### Script Update information
+
+If a Gmodstore script installed on the server is outdated, a notification will appear in the server console and on the in-game menu.
+
+### Debug Logs
+
+The user only need to Login via Steam (ingame) to upload a copy of the server's console.log.
+Any IP will be removed to support privacy.
+
+Debug Logs contain the following informations:
+
+* Server IP Address
+* Server Name
+* Gamemode
+* Average player ping
+* Addons that are using libgmodstore (which includes:)
+  * Addon Name
+  * Addon Version
+  * Gmodstore ID
+  * SteamID of the Licensee
+* User that Uploaded that log
+
+There will be a message if the user need to enable `-condebug`.
+
+## Example Code for your addon
 
 ```lua
 local SHORT_SCRIPT_NAME = "bLogs" -- A short version of your script's name to identify it

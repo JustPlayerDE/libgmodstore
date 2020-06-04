@@ -199,10 +199,8 @@ if (SERVER) then
             metadata = {}
         }
 
-        -- [[ TODO: Update check feature
-        -- Also broken
         if (options.version ~= nil) then
-            http.Fetch(URL .. "/api/checkversion/" .. urlencode(script_id) .. "/" .. urlencode(options.version), function(body, size, headers, code)
+            http.Fetch(URL .. "/api/checkversion/" .. urlencode(script_id) .. "/" .. urlencode(options.version) .. "?type=" .. (options.type or "gmodstore"), function(body, size, headers, code)
                 if (code ~= 200) then
                     libgmodstore:print("[2] Error while checking for updates on script " .. script_id .. ": HTTP " .. code, "bad")
                     libgmodstore.scripts[script_id].metadata.status = libgmodstore.ERROR

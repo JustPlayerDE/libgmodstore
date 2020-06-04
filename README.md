@@ -40,9 +40,9 @@ There will be a message if the user need to enable `-condebug`.
 ## Example Code for your addon
 
 ```lua
-local SHORT_SCRIPT_NAME = "bLogs" -- A short version of your script's name to identify it
-local SCRIPT_ID = 1599 -- The script's ID on gmodstore
-local SCRIPT_VERSION = "Remastered-12" -- [Optional] The version of your script. You don't _have_ to use the update notification feature, so you can remove it from libgmodstore:InitScript if you want to
+local SHORT_SCRIPT_NAME = "FlatHud" -- A short version of your script's name to identify it
+local SCRIPT_ID = 7034 -- The script's ID on gmodstore
+local SCRIPT_VERSION = "1.3.6" -- [Optional] The version of your script. You don't have to use the update notification feature, so you can remove it from libgmodstore:InitScript if you want to
 local LICENSEE = "{{ user_id }}" -- [Optional] The SteamID64 of the person who bought the script. They will have access to debug logs, update notifications, etc. If you do not supply this, superadmins (:IsSuperAdmin()) will have permission instead.
 
 hook.Add("libgmodstore_init",SHORT_SCRIPT_NAME .. "_libgmodstore",function()

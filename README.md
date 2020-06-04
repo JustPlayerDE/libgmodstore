@@ -2,11 +2,18 @@
 
 Read the [thread](https://www.gmodstore.com/community/threads/4465-libgmodstore) on gmodstore.
 
-You can Download the newest version here: [Download](https://github.com/JustPlayerDE/libgmodstore/archive/master.zip) (Auto updater comes later)
+Libgmodstore was originally made by Billy to assist content creators with customer support and customer engagement.
 
-Content Creators can register there addons on [libgmod.justplayer.de](https://libgmod.justplayer.de).
+Download: [Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=2118049526) or [Direct Download](https://github.com/JustPlayerDE/libgmodstore/archive/master.zip)
 
-# Features
+Website: [https://libgmod.justplayer.de](https://libgmod.justplayer.de)
+
+Thanks to:
+
+* Billy for making the initial version of Libgmodstore
+* Tom.bat for helping me
+
+## Features
 
 ### Ingame Menu
 

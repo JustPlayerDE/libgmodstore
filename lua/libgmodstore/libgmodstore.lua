@@ -347,6 +347,8 @@ All IPs are removed before uploading.]])
         m.Tabs.DebugLogs.Submit:SetText("Authenticate")
 
         -- TODO: Optimising Auth stuff
+        -- i should replace the entire Instructions panel with a DHTML frame
+        -- so there is no bad looking popup and the informations can be always up to date
         function m.Tabs.DebugLogs.Submit:DoClick()
             --m.Tabs.DebugLogs.Submit:SetDisabled(true)
             if libgmodstore.AuthWindow and IsValid(libgmodstore.AuthWindow) then

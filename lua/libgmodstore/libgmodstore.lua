@@ -1,3 +1,4 @@
+-- TODO: should i merge libgmodstore_init and libgmodstore?
 local URL = "https://libgmod.justplayer.de"
 
 if libgmodstore and libgmodstore.debug then
@@ -108,7 +109,6 @@ if (SERVER) then
                     token = authcode
                 }
 
-                -- TODO: server url
                 http.Post(URL .. "/api/log/push", arguments, function(body, size, headers, code)
                     if (code ~= 200) then
                         net.Start("libgmodstore_uploaddebuglog")

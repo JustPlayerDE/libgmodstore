@@ -1,6 +1,6 @@
 local URL = "https://libgmod.justplayer.de"
 
-if libgmodstore and LIBGMODSTORE_DEBUG then
+if libgmodstore and libgmodstore.debug then
     if (IsValid(libgmodstore.Menu)) then
         libgmodstore.Menu:Close()
     end

@@ -1,4 +1,5 @@
 -- TODO: should i merge libgmodstore_init and libgmodstore?
+-- TODO: Very basic Usage Statistics Tracker is planned, i'll implement the Opt-out option first in the next days or weeks! 
 local URL = "https://libgmod.justplayer.de"
 
 if libgmodstore and libgmodstore.debug then

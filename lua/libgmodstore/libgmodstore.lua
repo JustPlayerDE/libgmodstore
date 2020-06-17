@@ -260,6 +260,10 @@ if (SERVER) then
         return true
     end
 
+    if usage_stats_convar:GetBool() then
+        libgmodstore:print("Usage Tracker is Enabled, you can disable it with 'libgmodstore_enable_usage_tracker 0'.", "bad")
+    end
+
     hook.Run("libgmodstore_init")
 else
     local function paint_blank()

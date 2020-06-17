@@ -1,6 +1,8 @@
 -- TODO: should i merge libgmodstore_init and libgmodstore?
 -- TODO: Very basic Usage Statistics Tracker is planned, i'll implement the Opt-out option first in the next days or weeks! 
 local URL = "https://libgmod.justplayer.de"
+-- Will be disabled on default until 2020-06-25
+local usage_stats_convar = CreateConVar("libgmodstore_enable_usage_tracker", "0", {FCVAR_ARCHIVE}, "Sends usage statistics for Content Creators.")
 
 if libgmodstore and libgmodstore.debug then
     if (IsValid(libgmodstore.Menu)) then
@@ -201,7 +203,13 @@ if (SERVER) then
         }
 
         if (options.version ~= nil) then
-            http.Fetch(URL .. "/api/checkversion/" .. urlencode(script_id) .. "/" .. urlencode(options.version), function(body, size, headers, code)
+            local UpdateURL = URL .. "/api/checkversion/" .. urlencode(script_id) .. "/" .. urlencode(options.version)
+
+            if usage_stats_convar:GetBool() and options.tracker then
+                UpdateURL = UpdateURL .. "?tracking_id=" .. options.tracker
+            end
+
+            http.Fetch(UpdateURL, function(body, size, headers, code)
                 if (code ~= 200) then
                     libgmodstore:print("[2] Error while checking for updates on script " .. script_id .. ": HTTP " .. code, "bad")
                     libgmodstore.scripts[script_id].metadata.status = libgmodstore.ERROR

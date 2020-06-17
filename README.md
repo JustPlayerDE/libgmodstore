@@ -44,6 +44,16 @@ Debug Logs contain the following informations:
 
 There will be a message if the user need to enable `-condebug`.
 
+### [WIP] Usage Statistic
+
+For the content creators libgmodstore also have a very simple usage tracker (it only counts how many servers are using your addon per day)
+
+To Opt-Out of this as a Server owner (for all addons) you only need to run this command in your console and it should never send any data:
+
+`libgmodstore_enable_usage_tracker 0`
+
+This tool is currently work in progress and only some creators will have access to it for now.
+
 ## Example Code for your addon
 
 ```lua

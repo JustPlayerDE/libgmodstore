@@ -50,6 +50,8 @@ For the content creators libgmodstore also have a very simple usage tracker (it 
 
 To Opt-Out of this as a Server owner (for all addons) you only need to run this command in your console and it should never send any data:
 
+> Note: this will be disabled on default on all servers having this addon installed before 2020-06-25.
+
 `libgmodstore_enable_usage_tracker 0`
 
 This tool is currently work in progress and only some creators will have access to it for now.

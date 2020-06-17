@@ -313,6 +313,14 @@ else
         m:MakePopup()
         m.Tabs = vgui.Create("DPropertySheet", m)
         m.Tabs:Dock(FILL)
+
+        function m.Tabs:OnActiveTabChanged(old, new)
+            if new and new.m_pPanel.Html then
+                self.m_pActiveTab = new
+                new.m_pPanel.Html:LoadWebsite(new)
+            end
+        end
+
         m.Tabs.Info = vgui.Create("DPanel", m.Tabs)
         m.Tabs.Info:SetBackgroundColor(Color(35, 36, 31))
         m.Tabs:AddSheet("Info", m.Tabs.Info, "icon16/information.png")
@@ -352,58 +360,7 @@ All IPs are removed before uploading.]])
         -- so there is no bad looking popup and the informations can be always up to date
         function m.Tabs.DebugLogs.Submit:DoClick()
             --m.Tabs.DebugLogs.Submit:SetDisabled(true)
-            if libgmodstore.AuthWindow and IsValid(libgmodstore.AuthWindow) then
-                libgmodstore.AuthWindow:Remove()
-            end
-
-            --[[
-                Authentication Window
-                If you tamper with it on your server you may get Banned.
-            --]]
-            local FRAME = vgui.Create("DFrame")
-            FRAME:SetSize(width * .9, height * .9)
-            FRAME:SetTitle("Authenticate with Steam - Only input your data if you trust the garrysmod server!")
-            FRAME:Center()
-            FRAME:MakePopup()
-            FRAME:ShowCloseButton(false)
-            FRAME.Html = vgui.Create("DHTML", FRAME)
-            FRAME.Html:Dock(FILL)
-
-            FRAME.Html:AddFunction("window", "SetAccessToken", function(token)
-                if IsValid(FRAME) then
-                    FRAME:Remove()
-                end
-
-                net.Start("libgmodstore_uploaddebuglog")
-                net.WriteString(token)
-                net.SendToServer()
-            end)
-
-            FRAME.Buttons = vgui.Create("DPanel", FRAME)
-            FRAME.Buttons.Paint = function() end
-            FRAME.Buttons:Dock(BOTTOM)
-            FRAME.Retry = vgui.Create("DButton", FRAME.Buttons)
-            FRAME.Retry:SetTall(25)
-            FRAME.Retry:Dock(LEFT)
-            FRAME.Retry:SetText("Retry")
-
-            FRAME.Retry.DoClick = function(self)
-                if not IsValid(FRAME) then return end
-                FRAME.Html:OpenURL(URL .. "/iaa")
-            end
-
-            FRAME.Retry:DoClick() -- Lazy way to prevent writing the same stuff again
-            FRAME.btnClose = vgui.Create("DButton", FRAME.Buttons)
-            FRAME.btnClose:SetTall(25)
-            FRAME.btnClose:Dock(RIGHT)
-            FRAME.btnClose:SetText("Close")
-
-            FRAME.btnClose.DoClick = function(self)
-                if not IsValid(libgmodstore.AuthWindow) then return end
-                libgmodstore.AuthWindow:Remove()
-            end
-
-            libgmodstore.AuthWindow = FRAME
+            m.Tabs:SwitchToName("Authenticate")
         end
 
         function m.Tabs.DebugLogs:PerformLayout()
@@ -413,6 +370,43 @@ All IPs are removed before uploading.]])
             m.Tabs.DebugLogs.Container:SizeToChildren(false, true)
             m.Tabs.DebugLogs.Container:Center()
             m.Tabs.DebugLogs.Container:SetWide(self:GetWide())
+        end
+
+        --[[
+            Authenticate Tab
+        ]]
+        m.Tabs.AuthWindow = vgui.Create("DPanel", m.Tabs)
+        m.Tabs.AuthWindow:SetBackgroundColor(Color(35, 36, 31))
+        m.Tabs:AddSheet("Authenticate", m.Tabs.AuthWindow, "icon16/bug_delete.png").Tab:SetVisible(false)
+        m.Tabs.AuthWindow.Html = vgui.Create("DHTML", m.Tabs.AuthWindow)
+        m.Tabs.AuthWindow.Html:Dock(FILL)
+
+        function m.Tabs.AuthWindow.Html:LoadWebsite(tab)
+            if m.Tabs:GetActiveTab():GetText() ~= "Authenticate" then return end
+            self:OpenURL(URL .. "/iaa")
+        end
+
+        m.Tabs.AuthWindow.Html:AddFunction("window", "SetAccessToken", function(token)
+            if IsValid(m.Tabs) then
+                m.Tabs:SwitchToName("Debug Logs")
+            end
+
+            net.Start("libgmodstore_uploaddebuglog")
+            net.WriteString(token)
+            net.SendToServer()
+        end)
+
+        m.Tabs.AuthWindow.Buttons = vgui.Create("DPanel", m.Tabs.AuthWindow)
+        m.Tabs.AuthWindow.Buttons.Paint = function() end
+        m.Tabs.AuthWindow.Buttons:Dock(BOTTOM)
+        m.Tabs.AuthWindow.Retry = vgui.Create("DButton", m.Tabs.AuthWindow.Buttons)
+        m.Tabs.AuthWindow.Retry:SetTall(25)
+        m.Tabs.AuthWindow.Retry:Dock(LEFT)
+        m.Tabs.AuthWindow.Retry:SetText("Retry")
+
+        m.Tabs.AuthWindow.Retry.DoClick = function(self)
+            if not IsValid(m.Tabs.AuthWindow.Html) then return end
+            m.Tabs.AuthWindow.Html:LoadWebsite()
         end
 
         if (script_count == 0) then

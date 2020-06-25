@@ -2,7 +2,7 @@
 -- TODO: Very basic Usage Statistics Tracker is planned, i'll implement the Opt-out option first in the next days or weeks! 
 local URL = "https://libgmod.justplayer.de"
 -- Will be disabled on default until 2020-06-25
-local usage_stats_convar = CreateConVar("libgmodstore_enable_usage_tracker", "0", {FCVAR_ARCHIVE}, "Sends usage statistics for Content Creators.")
+local usage_stats_convar = CreateConVar("libgmodstore_enable_usage_tracker", "1", {FCVAR_ARCHIVE}, "Sends usage statistics for Content Creators.")
 
 if libgmodstore and libgmodstore.debug then
     if (IsValid(libgmodstore.Menu)) then

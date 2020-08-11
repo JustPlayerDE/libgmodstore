@@ -68,6 +68,8 @@ local Colors = {
 
 local Common = {
     HeaderHeight = Scale(34),
+    ButtonHeight = Scale(28),
+    ItemHeight = Scale(24),
     Padding = Scale(4),
     Line = Scale(2),
     Corners = Scale(6)
@@ -108,6 +110,7 @@ local function BuildAddonInfo(gmodstore_id, pnl, addon)
         surface.DrawRect(0, h - Common.Line, w, Common.Line)
     end
 
+    NamePanel:SetTall(Common.HeaderHeight)
     local AddonName = vgui.Create("DLabel", NamePanel)
     AddonName:Dock(FILL)
     AddonName:SetText(addon.script_name)
@@ -269,6 +272,7 @@ net.Receive("libgmodstore_open", function()
         local Color = ((count % 2 == 0) and Colors.PrimaryAlternate or Colors.Primary)
         btnPanel:Dock(TOP)
         btnPanel:DockMargin(0, 0, 0, margin)
+        btnPanel:SetTall(Common.ItemHeight)
         btnPanel.Paint = nil
         --- Button
         local btn = vgui.Create("DButton", btnPanel)
@@ -309,7 +313,7 @@ net.Receive("libgmodstore_open", function()
         status.Paint = function(self, w, h)
             surface.SetDrawColor(btn:IsHovered() and Colors.Background or Color)
             surface.DrawRect(0, 0, w, h)
-            surface.SetDrawColor(InfoMaterials[addon.status].color)
+            surface.SetDrawColor(InfoMaterials[addon.status].color or color_white)
             surface.SetMaterial(InfoMaterials[addon.status].mat)
             surface.DrawTexturedRect(w - h + offset, offset, h - (offset * 2), h - (offset * 2))
         end
@@ -325,6 +329,7 @@ net.Receive("libgmodstore_open", function()
     btn:Dock(BOTTOM)
     btn:SetTextColor(Colors.Text)
     btn:SetText("Log Uploader")
+    btn:SetTall(Common.ButtonHeight)
 
     btn.Paint = function(self, w, h)
         surface.SetDrawColor(self:IsHovered() and Colors.Background or Colors.PrimaryAlternate)

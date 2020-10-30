@@ -339,6 +339,17 @@ net.Receive("libgmodstore_open", function()
 
     btn.DoClick = function(self)
         if m.DebugLogs and IsValid(m.DebugLogs.Instructions) then return end
+
+        -- Clear Selection if set
+        do
+            if IsValid(m.list.Current) then
+                if m.list.Current == self then return end
+                m.list.Current:SetTextColor(Colors.TextInactive)
+            end
+
+            m.list.Current = nil
+        end
+
         m.body:Clear()
         m.DebugLogs = {}
         m.DebugLogs.Instructions = vgui.Create("DLabel", m.body)

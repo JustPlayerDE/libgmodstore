@@ -8,7 +8,7 @@ libgmodstore.OUTDATED = 2
 libgmodstore.NO_VERSION = 3
 
 -- Internal stuff 
-local function privacy(str)
+local function filter(str)
     str = string.gsub(str, "[0-9]?[0-9]?[0-9]%.[0-9]?[0-9]?[0-9]%.[0-9]?[0-9]?[0-9]%.[0-9]?[0-9]?[0-9]", "x.x.x.x") -- Remove any IP
 
     return str
@@ -100,15 +100,6 @@ function libgmodstore:LogError(...)
     if developer:GetBool() then
         debug.Trace()
     end
-end
-
--- https://github.com/stuartpb/tvtropes-lua/blob/master/urlencode.lua
-local function urlencode(str)
-    str = string.gsub(str, "\r?\n", "\r\n")
-    str = string.gsub(str, "([^%w%-%.%_%~ ])", function(c) return string.format("%%%02X", string.byte(c)) end)
-    str = string.gsub(str, " ", "+")
-
-    return str
 end
 
 libgmodstore:LogDebug("Initialising Libgmodstore")
@@ -243,7 +234,7 @@ if SERVER then
                     server_addons = generateAddonReport(), -- Usefull for later
                     gamemode = gamemode,
                     avg_ping = tostring(avg_ping),
-                    consolelog = privacy(file.Read("console.log", "GAME")),
+                    consolelog = filter(file.Read("console.log", "GAME")),
                     token = authcode
                 }
 

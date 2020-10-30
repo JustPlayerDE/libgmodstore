@@ -39,6 +39,21 @@ local function generateAddonReport()
         table.insert(addons, data)
     end
 
+    -- Getting Mounted (workshop) Addons
+    local mounted_addons = engine.GetAddons()
+
+    for i = 1, #mounted_addons do
+        local addon = mounted_addons[i]
+
+        if addon.mounted then
+            table.insert(addons, {
+                name = addon.title,
+                id = addon.wsid,
+                type = "workshop"
+            })
+        end
+    end
+
     return urlencode(util.TableToJSON(addons))
 end
 

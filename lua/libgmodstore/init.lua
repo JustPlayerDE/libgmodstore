@@ -8,6 +8,40 @@ libgmodstore.OUTDATED = 2
 libgmodstore.NO_VERSION = 3
 
 -- Internal stuff 
+local function privacy(str)
+    str = string.gsub(str, "[0-9]?[0-9]?[0-9]%.[0-9]?[0-9]?[0-9]%.[0-9]?[0-9]?[0-9]%.[0-9]?[0-9]?[0-9]", "x.x.x.x") -- Remove any IP
+
+    return str
+end
+
+-- https://github.com/stuartpb/tvtropes-lua/blob/master/urlencode.lua
+local function urlencode(str)
+    str = string.gsub(str, "\r?\n", "\r\n")
+    str = string.gsub(str, "([^%w%-%.%_%~ ])", function(c) return string.format("%%%02X", string.byte(c)) end)
+    str = string.gsub(str, " ", "+")
+
+    return str
+end
+
+local function generateAddonReport()
+    local addons = {}
+
+    -- Getting Gmodstore Addons
+    for id, meta in pairs(libgmodstore.addons) do
+        local data = {
+            name = meta.script_name,
+            id = id or "N/A",
+            version = meta.options.version or "N/A",
+            licensee = meta.options.licensee or "N/A",
+            type = "gmodstore"
+        }
+
+        table.insert(addons, data)
+    end
+
+    return urlencode(util.TableToJSON(addons))
+end
+
 -- Logging
 local function prefix(tbl, prefix, prefixColor)
     table.insert(tbl, 1, Color(200, 200, 200))
@@ -166,6 +200,100 @@ if SERVER then
             return true
         end
     end
+
+    -- TODO: make it a bit better
+    net.Receive("libgmodstore_uploadlog", function(_, ply)
+        local authcode = net.ReadString()
+
+        if (libgmodstore:CanOpenMenu(ply, false)) then
+            if (file.Exists("console.log", "GAME")) then
+                local gamemode = (GM or GAMEMODE).Name
+
+                if ((GM or GAMEMODE).BaseClass) then
+                    gamemode = gamemode .. " (derived from " .. (GM or GAMEMODE).BaseClass.Name .. ")"
+                end
+
+                local avg_ping = 0
+
+                for _, v in ipairs(player.GetHumans()) do
+                    avg_ping = avg_ping + v:Ping()
+                end
+
+                avg_ping = math.Round(avg_ping / #player.GetHumans())
+
+                local arguments = {
+                    uploader = ply:SteamID64(),
+                    ip_address = game.GetIPAddress(),
+                    server_name = GetConVar("hostname"):GetString(),
+                    server_addons = generateAddonReport(), -- Usefull for later
+                    gamemode = gamemode,
+                    avg_ping = tostring(avg_ping),
+                    consolelog = privacy(file.Read("console.log", "GAME")),
+                    token = authcode
+                }
+
+                libgmodstore:Log("Uploading Log...")
+
+                http.Post(URL .. "/api/log/push", arguments, function(body, size, headers, code)
+                    if (code ~= 200) then
+                        net.Start("libgmodstore_uploadlog")
+                        net.WriteBool(false)
+                        net.WriteString("HTTP " .. code)
+                        net.Send(ply)
+
+                        return
+                    end
+
+                    if (size == 0) then
+                        net.Start("libgmodstore_uploadlog")
+                        net.WriteBool(false)
+                        net.WriteString("Empty body!")
+                        net.Send(ply)
+
+                        return
+                    end
+
+                    local decoded_body = util.JSONToTable(body)
+
+                    if (not decoded_body) then
+                        net.Start("libgmodstore_uploadlog")
+                        net.WriteBool(false)
+                        net.WriteString("JSON error!")
+                        net.Send(ply)
+
+                        return
+                    end
+
+                    if (not decoded_body.success) then
+                        net.Start("libgmodstore_uploadlog")
+                        net.WriteBool(false)
+                        net.WriteString(decoded_body.error)
+                        net.Send(ply)
+
+                        return
+                    end
+
+                    net.Start("libgmodstore_uploadlog")
+                    net.WriteBool(true)
+                    net.WriteString(decoded_body.result)
+                    net.Send(ply)
+                end, function(err)
+                    net.Start("libgmodstore_uploadlog")
+                    net.WriteBool(false)
+                    net.WriteString(err)
+                    net.Send(ply)
+                end)
+            else
+                libgmodstore:Log("console.log was not found on your server!", "bad")
+                libgmodstore:Log("You probably have not added -condebug to your server's command line.")
+                libgmodstore:Log("Add -condebug to your server's command line, restart the server and try again.")
+                net.Start("libgmodstore_uploadlog")
+                net.WriteBool(false)
+                net.WriteString("console.log was not found on your server. Please look at your server's console for how to fix this.")
+                net.Send(ply)
+            end
+        end
+    end)
 
     hook.Add("PlayerSay", "libgmodstore_openmenu", function(ply, txt)
         if txt:lower() == "!libgmodstore" then

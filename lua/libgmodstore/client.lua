@@ -1,6 +1,7 @@
 local rgb = Color
 local fetch = http.Fetch
 local ImgurCache = {}
+local URL = "https://libgmod.justplayer.de"
 file.CreateDir("darklib/images")
 
 local function Scale(base)
@@ -206,7 +207,7 @@ net.Receive("libgmodstore_open", function()
         m.btnMaxim:Hide()
         m.lblTitle:SetFont("libgmodstore.Title")
         m:SetTitle("libgmodstore")
-        m:SetSize(Scale(800), Scale(600))
+        m:SetSize(Scale(1150), Scale(650))
         m:SetDraggable(false)
         m:DockPadding(0, Common.HeaderHeight, 0, 0)
         -- Create body panel
@@ -337,6 +338,104 @@ net.Receive("libgmodstore_open", function()
     end
 
     btn.DoClick = function(self)
-        Derma_Message("This Feature is currently not implemented in this version!", "Not Implemented", "OK")
+        if m.DebugLogs and IsValid(m.DebugLogs.Instructions) then return end
+        m.body:Clear()
+        m.DebugLogs = {}
+        m.DebugLogs.Instructions = vgui.Create("DLabel", m.body)
+        m.DebugLogs.Instructions:SetFont("libgmodstore")
+        m.DebugLogs.Instructions:SetTextColor(Color(255, 255, 255))
+        m.DebugLogs.Instructions:SetContentAlignment(8)
+        m.DebugLogs.Instructions:Dock(TOP)
+        m.DebugLogs.Instructions:DockMargin(0, m.body:GetTall() / 3, 0, 10)
+        m.DebugLogs.Instructions:SetText([[If you're here, a content creator has probably asked you to supply them with a debug log
+To do this, you need to Authenticate yourself with your Steam account.
+
+This is only to prevent abuse of this system.
+
+All IPs are removed before uploading.]])
+        m.DebugLogs.Instructions:SizeToContents()
+        m.DebugLogs.Submit = vgui.Create("DButton", m.body)
+        m.DebugLogs.Submit:SetTall(Common.ButtonHeight)
+        m.DebugLogs.Submit:Dock(TOP)
+        m.DebugLogs.Submit:SetFont("libgmodstore.Button")
+        m.DebugLogs.Submit:SetText("Authenticate")
+        m.DebugLogs.Submit:SetTextColor(Colors.Text)
+
+        m.DebugLogs.Submit.Paint = function(self, w, h)
+            surface.SetDrawColor(self:IsHovered() and Colors.PrimaryAlternate or Colors.Background)
+            surface.DrawRect(0, 0, w, h)
+        end
+
+        m.DebugLogs.Submit.DoClick = function(self)
+            --[[
+                Authenticate Tab
+            ]]
+            m.body:Clear()
+            m.AuthWindow = vgui.Create("DPanel", m.body)
+            m.AuthWindow:Dock(TOP)
+            m.AuthWindow:SetTall(m.body:GetTall() * .99)
+            m.AuthWindow.Html = vgui.Create("DHTML", m.AuthWindow)
+            m.AuthWindow.Html:Dock(FILL)
+
+            function m.AuthWindow.Html:LoadWebsite(tab)
+                self:OpenURL(URL .. "/iaa")
+            end
+
+            local size = Scale(64)
+
+            m.AuthWindow.Html.Paint = function(self, w, h)
+                surface.SetMaterial(LoadingMaterial)
+                surface.SetDrawColor(Colors.Red)
+                surface.DrawTexturedRectRotated(w / 2, h / 2, size, size, (CurTime() % 360) * -100)
+            end
+
+            m.AuthWindow.Html:AddFunction("window", "SetAccessToken", function(token)
+                if IsValid(m) then
+                    m.body:Clear()
+                    --m:SwitchToName("Debug Logs")
+                end
+
+                net.Start("libgmodstore_uploadlog")
+                net.WriteString(token)
+                net.SendToServer()
+            end)
+
+            m.AuthWindow.Buttons = vgui.Create("DPanel", m.AuthWindow)
+            m.AuthWindow.Buttons.Paint = function() end
+            m.AuthWindow.Buttons:Dock(BOTTOM)
+            m.AuthWindow.Retry = vgui.Create("DButton", m.AuthWindow.Buttons)
+            m.AuthWindow.Retry:SetTall(Common.ButtonHeight)
+            m.AuthWindow.Retry:Dock(BOTTOM)
+            m.AuthWindow.Retry:SetText("Retry")
+            m.AuthWindow.Retry:SetFont("libgmodstore")
+            m.AuthWindow.Retry:SetTextColor(Colors.Text)
+
+            m.AuthWindow.Retry.Paint = function(self, w, h)
+                surface.SetDrawColor(self:IsHovered() and Colors.PrimaryAlternate or Colors.Background)
+                surface.DrawRect(0, 0, w, h)
+            end
+
+            m.AuthWindow.Retry.DoClick = function(self)
+                if not IsValid(m.AuthWindow.Html) then return end
+                m.AuthWindow.Html:LoadWebsite()
+            end
+
+            m.AuthWindow.Html:LoadWebsite()
+        end
+    end
+end)
+
+net.Receive("libgmodstore_uploadlog", function()
+    local success = net.ReadBool()
+
+    if (not success) then
+        local error = net.ReadString()
+        Derma_Message("Error with trying to upload the debug log:\n" .. error, "Error", "OK")
+    else
+        local url = net.ReadString()
+
+        Derma_StringRequest("Success", "Your debug log has been uploaded.\nYou can now copy and paste the link below to the content creator.", url, function() end, function()
+            gui.OpenURL(url)
+        end, "Close", "Open URL")
     end
 end)

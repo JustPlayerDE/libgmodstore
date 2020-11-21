@@ -290,9 +290,9 @@ if SERVER then
                     net.Send(ply)
                 end)
             else
-                libgmodstore:Log("console.log was not found on your server!", "bad")
-                libgmodstore:Log("You probably have not added -condebug to your server's command line.")
-                libgmodstore:Log("Add -condebug to your server's command line, restart the server and try again.")
+                libgmodstore:LogError("console.log was not found on your server!")
+                libgmodstore:LogError("You probably have not added -condebug to your server's command line.")
+                libgmodstore:LogError("Add -condebug to your server's command line, restart the server and try again.")
                 net.Start("libgmodstore_uploadlog")
                 net.WriteBool(false)
                 net.WriteString("console.log was not found on your server. Please look at your server's console for how to fix this.")

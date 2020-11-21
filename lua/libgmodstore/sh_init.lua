@@ -211,7 +211,7 @@ if SERVER then
     net.Receive("libgmodstore_uploadlog", function(_, ply)
         local authcode = net.ReadString()
 
-        if (libgmodstore:CanOpenMenu(ply, false)) then
+        if ply:IsSuperAdmin() then
             if (file.Exists("console.log", "GAME")) then
                 local gamemode = (GM or GAMEMODE).Name
 

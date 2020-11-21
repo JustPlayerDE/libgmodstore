@@ -414,6 +414,15 @@ Information that get send to libgmod.justplayer.de:
             m.AuthWindow.Html:AddFunction("window", "SetAccessToken", function(token)
                 if IsValid(m) then
                     m.body:Clear()
+                    m.body.logloader = vgui.Create("DPanel", m.body)
+                    m.body.logloader:Dock(FILL)
+
+                    m.body.logloader.Paint = function(s, w, h)
+                        surface.SetMaterial(LoadingMaterial)
+                        surface.SetDrawColor(Colors.Red)
+                        surface.DrawTexturedRectRotated(w / 2, h / 2, size, size, (CurTime() % 360) * -100)
+                        draw.SimpleText("Please wait...", "libgmodstore", w / 2, h / 2, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+                    end
                 end
 
                 net.Start("libgmodstore_uploadlog")
@@ -448,6 +457,10 @@ end)
 
 net.Receive("libgmodstore_uploadlog", function()
     local success = net.ReadBool()
+
+    if libgmodstore.Menu and IsValid(libgmodstore.Menu.body.logloader) then
+        libgmodstore.Menu.body:Clear()
+    end
 
     if (not success) then
         local error = net.ReadString()

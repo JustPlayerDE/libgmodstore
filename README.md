@@ -17,7 +17,12 @@ Thanks to:
 
 ### Ingame Menu
 
-This is where server owners will interact with the library. At the moment, it's a simple docked default Derma skin frame, so it's not the nicest looking thing in the world but it's fast, efficient and has maximum portability. It is opened by typing `!libgmodstore` in chat.
+This is where server owners will interact with the library. it's a simple and dark design. It's fast, efficient and has maximum portability. It is opened by typing `!libgmodstore` in chat.
+
+Please note that currently the icons are loaded from imgur.
+
+![When you click on a Addon](https://i.imgur.com/WkyG5Vg.png)
+![When you click on Log Uploader](https://i.imgur.com/jmk7tQ6.png)
 
 ### Script Update information
 
@@ -40,6 +45,7 @@ Debug Logs contain the following informations:
   * Addon Version
   * Gmodstore ID
   * SteamID of the Licensee
+* Addons that are workshop mounted
 * User that Uploaded that log
 
 There will be a message if the user need to enable `-condebug`.
@@ -62,7 +68,7 @@ This tool is currently work in progress and only some creators will have access 
 local SHORT_SCRIPT_NAME = "FlatHud" -- A short version of your script's name to identify it
 local SCRIPT_ID = 7034 -- The script's ID on gmodstore
 local SCRIPT_VERSION = "1.3.6" -- [Optional] The version of your script. You don't have to use the update notification feature, so you can remove it from libgmodstore:InitScript if you want to
-local LICENSEE = "{{ user_id }}" -- [Optional] The SteamID64 of the person who bought the script. They will have access to debug logs, update notifications, etc. If you do not supply this, superadmins (:IsSuperAdmin()) will have permission instead.
+local LICENSEE = "{{ user_id }}" -- [Optional] The SteamID64 of the person who bought the script. They will have access to update notifications etc. If you do not supply this, superadmins (:IsSuperAdmin()) will have permission instead.
 
 hook.Add("libgmodstore_init",SHORT_SCRIPT_NAME .. "_libgmodstore",function()
     libgmodstore:InitScript(SCRIPT_ID,SHORT_SCRIPT_NAME,{

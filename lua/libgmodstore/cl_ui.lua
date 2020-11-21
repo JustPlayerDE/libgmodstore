@@ -154,7 +154,7 @@ net.Receive("libgmodstore_open", function()
         }
     end
 
-    if (IsValid(libgmodstore.Menu)) then
+    if IsValid(libgmodstore.Menu) then
         libgmodstore.Menu:Close()
     end
 
@@ -403,7 +403,6 @@ All IPs are removed before uploading.]])
             m.AuthWindow.Html:AddFunction("window", "SetAccessToken", function(token)
                 if IsValid(m) then
                     m.body:Clear()
-                    --m:SwitchToName("Debug Logs")
                 end
 
                 net.Start("libgmodstore_uploadlog")

@@ -357,17 +357,28 @@ net.Receive("libgmodstore_open", function()
         m.DebugLogs.Instructions:SetTextColor(Color(255, 255, 255))
         m.DebugLogs.Instructions:SetContentAlignment(8)
         m.DebugLogs.Instructions:Dock(TOP)
-        m.DebugLogs.Instructions:DockMargin(0, m.body:GetTall() / 3, 0, 10)
+        m.DebugLogs.Instructions:DockMargin(0, m.body:GetTall() / 5, 0, 10)
         m.DebugLogs.Instructions:SetText([[If you're here, a content creator has probably asked you to supply them with a debug log
 To do this, you need to Authenticate yourself with your Steam account.
 
 This is only to prevent abuse of this system.
 
-All IPs are removed before uploading.]])
+All IPs are removed before uploading.
+
+Information that get send to libgmod.justplayer.de:
+ - Average player Ping.
+ - Current Gamemode and its base Gamemode.
+ - Server IP and Name.
+ - console.log File (IPv4 cleaned).
+ - Supported Gmodstore Addons (Name, Version and ID).
+ - Mounted Workshop addons. (Name and ID)
+ 
+ These informations will be available for everyone who has access to the random generated url.]])
         m.DebugLogs.Instructions:SizeToContents()
         m.DebugLogs.Submit = vgui.Create("DButton", m.body)
         m.DebugLogs.Submit:SetTall(Common.ButtonHeight)
         m.DebugLogs.Submit:Dock(TOP)
+        m.DebugLogs.Submit:DockMargin(Common.ButtonHeight, Common.ButtonHeight, Common.ButtonHeight, Common.ButtonHeight)
         m.DebugLogs.Submit:SetFont("libgmodstore.Button")
         m.DebugLogs.Submit:SetText("Authenticate")
         m.DebugLogs.Submit:SetTextColor(Colors.Text)

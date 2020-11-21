@@ -114,7 +114,7 @@ if SERVER then
     -- To add Addons to Libgmodstore
     function libgmodstore:InitScript(script_id, script_name, options)
         if (not tonumber(script_id) or (script_name or ""):Trim():len() == 0) then return false end
-        libgmodstore:Log("(" .. script_id .. ") " .. script_name .. " is using libgmodstore")
+        libgmodstore:Log("[" .. script_id .. "] " .. script_name .. " is using libgmodstore")
 
         libgmodstore.addons[script_id] = {
             script_name = script_name,
@@ -161,7 +161,7 @@ if SERVER then
                     libgmodstore:LogError("[" .. script_id .. "] " .. script_name .. " is outdated! The latest version is " .. decoded_body.result.version .. " while you have " .. options.version)
                     libgmodstore.addons[script_id].metadata.status = libgmodstore.OUTDATED
                 else
-                    libgmodstore:LogOk("[" .. script_id .. "] " .. script_name .. " is up to date!", "good")
+                    libgmodstore:LogOk("[" .. script_id .. "] " .. script_name .. " is up to date!")
                     libgmodstore.addons[script_id].metadata.status = libgmodstore.OK
                 end
             end, function(err)

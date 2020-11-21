@@ -74,28 +74,20 @@ function libgmodstore:_Log(stuff)
 end
 
 function libgmodstore:Log(...)
-    stuff = {...}
-    prefix(stuff)
-    self:_Log(stuff)
+    self:_Log(prefix({...}))
 end
 
 function libgmodstore:LogDebug(...)
     if not developer:GetBool() then return end
-    stuff = {...}
-    prefix(stuff, "[DEBUG] ", Color(0, 0, 255))
-    self:_Log(stuff)
+    self:_Log(prefix({...}, "[DEBUG] ", Color(0, 0, 255)))
 end
 
 function libgmodstore:LogOk(...)
-    stuff = {...}
-    prefix(stuff, "[OK]", Color(0, 255, 0))
-    self:_Log(stuff)
+    self:_Log(prefix({...}, "[OK]", Color(0, 255, 0)))
 end
 
 function libgmodstore:LogError(...)
-    stuff = {...}
-    prefix(stuff, "[ERROR] ", Color(255, 0, 0))
-    self:_Log(stuff)
+    self:_Log(prefix({...}, "[ERROR] ", Color(255, 0, 0)))
 
     if developer:GetBool() then
         debug.Trace()
@@ -113,7 +105,7 @@ if SERVER then
 
     -- To add Addons to Libgmodstore
     function libgmodstore:InitScript(script_id, script_name, options)
-        if (not tonumber(script_id) or (script_name or ""):Trim():len() == 0) then return false end
+        if not tonumber(script_id) or (script_name or ""):Trim():len() == 0 then return false end
         libgmodstore:Log("[" .. script_id .. "] " .. script_name .. " is using libgmodstore")
 
         libgmodstore.addons[script_id] = {
@@ -124,7 +116,7 @@ if SERVER then
             }
         }
 
-        if (options.version ~= nil) then
+        if options.version ~= nil then
             -- Stats are disabled for now
             http.Fetch(URL .. "/api/checkversion/" .. urlencode(script_id) .. "/" .. urlencode(options.version), function(body, size, headers, code)
                 if (code ~= 200) then
@@ -212,11 +204,12 @@ if SERVER then
         local authcode = net.ReadString()
 
         if ply:IsSuperAdmin() then
-            if (file.Exists("console.log", "GAME")) then
-                local gamemode = (GM or GAMEMODE).Name
+            if file.Exists("console.log", "GAME") then
+                local gamemode = (GM or GAMEMODE)
+                local gamemode_name = gamemode.Name
 
-                if ((GM or GAMEMODE).BaseClass) then
-                    gamemode = gamemode .. " (derived from " .. (GM or GAMEMODE).BaseClass.Name .. ")"
+                if gamemode.BaseClass then
+                    gamemode_name = gamemode_name .. " (derived from " .. gamemode.BaseClass.Name .. ")"
                 end
 
                 local avg_ping = 0
@@ -232,7 +225,7 @@ if SERVER then
                     ip_address = game.GetIPAddress(),
                     server_name = GetConVar("hostname"):GetString(),
                     server_addons = generateAddonReport(), -- Usefull for later
-                    gamemode = gamemode,
+                    gamemode = gamemode_name,
                     avg_ping = tostring(avg_ping),
                     consolelog = filter(file.Read("console.log", "GAME")),
                     token = authcode
@@ -241,7 +234,7 @@ if SERVER then
                 libgmodstore:Log("Uploading Log...")
 
                 http.Post(URL .. "/api/log/push", arguments, function(body, size, headers, code)
-                    if (code ~= 200) then
+                    if code ~= 200 then
                         net.Start("libgmodstore_uploadlog")
                         net.WriteBool(false)
                         net.WriteString("HTTP " .. code)
@@ -250,7 +243,7 @@ if SERVER then
                         return
                     end
 
-                    if (size == 0) then
+                    if size == 0 then
                         net.Start("libgmodstore_uploadlog")
                         net.WriteBool(false)
                         net.WriteString("Empty body!")
@@ -261,7 +254,7 @@ if SERVER then
 
                     local decoded_body = util.JSONToTable(body)
 
-                    if (not decoded_body) then
+                    if not decoded_body then
                         net.Start("libgmodstore_uploadlog")
                         net.WriteBool(false)
                         net.WriteString("JSON error!")
@@ -270,7 +263,7 @@ if SERVER then
                         return
                     end
 
-                    if (not decoded_body.success) then
+                    if not decoded_body.success then
                         net.Start("libgmodstore_uploadlog")
                         net.WriteBool(false)
                         net.WriteString(decoded_body.error)

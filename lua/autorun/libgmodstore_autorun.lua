@@ -1,4 +1,5 @@
 hook.Add("Think", "LibGmodstore Init", function()
+    hook.Remove("Think", "LibGmodstore Init")
     AddCSLuaFile("libgmodstore/sh_init.lua")
     AddCSLuaFile("libgmodstore/cl_ui.lua")
     include("libgmodstore/sh_init.lua")
@@ -7,5 +8,4 @@ hook.Add("Think", "LibGmodstore Init", function()
         include("libgmodstore/cl_ui.lua")
     end
 
-    hook.Remove("Think", "LibGmodstore Init")
 end)

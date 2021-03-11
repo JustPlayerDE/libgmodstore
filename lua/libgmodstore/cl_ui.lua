@@ -380,7 +380,7 @@ Information that get send to libgmod.justplayer.de:
         m.DebugLogs.Submit:Dock(TOP)
         m.DebugLogs.Submit:DockMargin(Common.ButtonHeight, Common.ButtonHeight, Common.ButtonHeight, Common.ButtonHeight)
         m.DebugLogs.Submit:SetFont("libgmodstore.Button")
-        m.DebugLogs.Submit:SetText("Authenticate")
+        m.DebugLogs.Submit:SetText("Press here to Authenticate")
         m.DebugLogs.Submit:SetTextColor(Colors.Text)
 
         m.DebugLogs.Submit.Paint = function(self, w, h)

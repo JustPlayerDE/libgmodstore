@@ -32,6 +32,7 @@ local function generateAddonReport()
             name = meta.script_name,
             id = id or "N/A",
             version = meta.options.version or "N/A",
+            branch = meta.options.branch or "N/A",
             licensee = meta.options.licensee or "N/A",
             type = "gmodstore"
         }

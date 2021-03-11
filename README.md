@@ -68,11 +68,13 @@ This tool is currently work in progress and only some creators will have access 
 local SHORT_SCRIPT_NAME = "FlatHud" -- A short version of your script's name to identify it
 local SCRIPT_ID = 7034 -- The script's ID on gmodstore
 local SCRIPT_VERSION = "1.3.6" -- [Optional] The version of your script. You don't have to use the update notification feature, so you can remove it from libgmodstore:InitScript if you want to
+local SCRIPT_BRANCH = "stable" -- [Optional, default to 'stable' if not set for update checker] The version Branch to support multiple version types, sadly there is no {{ replacement }} by gmodstore afaik
 local LICENSEE = "{{ user_id }}" -- [Optional] The SteamID64 of the person who bought the script. They will have access to update notifications etc. If you do not supply this, superadmins (:IsSuperAdmin()) will have permission instead.
 
 hook.Add("libgmodstore_init",SHORT_SCRIPT_NAME .. "_libgmodstore",function()
     libgmodstore:InitScript(SCRIPT_ID,SHORT_SCRIPT_NAME,{
         version = SCRIPT_VERSION,
+        branch = SCRIPT_BRANCH,
         licensee = LICENSEE
     })
 end)

@@ -116,52 +116,6 @@ if SERVER then
             }
         }
 
-        if options.version ~= nil then
-            -- Stats are disabled for now
-            http.Fetch(URL .. "/api/checkversion/" .. urlencode(script_id) .. "/" .. urlencode(options.version), function(body, size, headers, code)
-                if (code ~= 200) then
-                    libgmodstore:LogError("[2] Error while checking for updates on script " .. script_id .. ": HTTP " .. code)
-                    libgmodstore.addons[script_id].metadata.status = libgmodstore.ERROR
-
-                    return
-                end
-
-                if (size == 0) then
-                    libgmodstore:LogError("[3] Error while checking for updates on script " .. script_id .. ": empty body!")
-                    libgmodstore.addons[script_id].metadata.status = libgmodstore.ERROR
-
-                    return
-                end
-
-                local decoded_body = util.JSONToTable(body)
-
-                if not decoded_body then
-                    libgmodstore:LogError("[4] Error while checking for updates on script " .. script_id .. ": JSON error!")
-                    libgmodstore.addons[script_id].metadata.status = libgmodstore.ERROR
-
-                    return
-                end
-
-                if not decoded_body.success then
-                    libgmodstore:LogError("[4] Error while checking for updates on script " .. script_id .. ": " .. decoded_body.error)
-                    libgmodstore.addons[script_id].metadata.status = libgmodstore.ERROR
-
-                    return
-                end
-
-                if decoded_body.result.outdated then
-                    libgmodstore:LogError("[" .. script_id .. "] " .. script_name .. " is outdated! The latest version is " .. decoded_body.result.version .. " while you have " .. options.version)
-                    libgmodstore.addons[script_id].metadata.status = libgmodstore.OUTDATED
-                else
-                    libgmodstore:LogOk("[" .. script_id .. "] " .. script_name .. " is up to date!")
-                    libgmodstore.addons[script_id].metadata.status = libgmodstore.OK
-                end
-            end, function(err)
-                libgmodstore:LogError("[1] Error while checking for updates on script " .. script_id .. ": " .. err)
-                libgmodstore.addons[script_id].metadata.status = libgmodstore.ERROR
-            end)
-        end
-
         return true
     end
 
@@ -316,5 +270,69 @@ if SERVER then
         end
     end)
 
-    hook.Run("libgmodstore_init") -- Getting addon informations
+    -- We run on the first Think of the game and check for updates
+    hook.Add("Think", "libgmodstore_checkforupdates", function()
+        hook.Remove("Think", "libgmodstore_checkforupdates")
+        hook.Run("libgmodstore_init") -- Getting addon informations
+        local addons = {}
+
+        for id, addon in pairs(libgmodstore.addons) do
+            if not addon.options.version then continue end -- ignore addons without version info
+
+            addons[#addons + 1] = {
+                id = id,
+                version = urlencode(addon.options.version),
+                type = urlencode(addon.options.branch or "stable")
+            }
+        end
+
+        -- Stats are disabled for now
+        http.Post(URL .. "/api/versions", {
+            addons = util.TableToJSON(addons) -- i hate http.Post for that
+        }, function(body, size, headers, code)
+            if (code ~= 200) then
+                libgmodstore:LogError("[2] Error while checking for updates: HTTP " .. code)
+
+                return
+            end
+
+            if (size == 0) then
+                libgmodstore:LogError("[3] Error while checking for updates: empty body!")
+
+                return
+            end
+
+            local decoded_body = util.JSONToTable(body)
+
+            if not decoded_body then
+                libgmodstore:LogError("[4] Error while checking for updates: JSON error!")
+
+                return
+            end
+
+            for id, result in pairs(decoded_body) do
+                if not istable(result) then
+                    libgmodstore:LogError("[5]  Error while checking for updates on script " .. id .. ": Malformed Result.")
+                    continue
+                end
+
+                if not result.success then
+                    libgmodstore:LogError("[4] Error while checking for updates on script " .. id .. ": " .. result.error)
+                    libgmodstore.addons[id].metadata.status = libgmodstore.ERROR
+                    continue
+                end
+
+                if result.result.outdated then
+                    libgmodstore:LogError("[" .. id .. "] " .. libgmodstore.addons[id].script_name .. " is outdated! The latest version is " .. result.result.version .. " while you have " .. libgmodstore.addons[id].options.version)
+                    libgmodstore.addons[id].metadata.status = libgmodstore.OUTDATED
+                else
+                    libgmodstore:LogOk("[" .. id .. "] " .. libgmodstore.addons[id].script_name .. " is up to date!")
+                    libgmodstore.addons[id].metadata.status = libgmodstore.OK
+                end
+            end
+        end, function(err)
+            libgmodstore:LogError("[1] Error while checking for updates: " .. err)
+            libgmodstore.addons[id].metadata.status = libgmodstore.ERROR
+        end)
+    end)
 end
